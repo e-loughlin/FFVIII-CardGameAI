@@ -1,4 +1,4 @@
-'''
+"""
  ___ _           _   ___         _                 __   _____ ___ ___ 
  | __(_)_ _  __ _| | | __|_ _ _ _| |_ __ _ ____  _  \ \ / /_ _|_ _|_ _|
  | _|| | ' \/ _` | | | _/ _` | ' \  _/ _` (_-< || |  \ V / | | | | | | 
@@ -18,14 +18,15 @@ The starting game state can be input in gamestate.yaml, specifying each of the 1
 in the game, their owner, their position (either "Hand" or 1-9), and the card strength values.
 
 Refer to README.md for detailed instructions.
-'''
+"""
 
-import yaml
 import argparse
-import os
-from enum import Enum
 import copy
 import math
+import os
+from enum import Enum
+
+import yaml
 
 # Constants
 PLAYER = "P"
@@ -48,13 +49,12 @@ class Card:
         output += " |{} {}| \n".format(self.left, self.right)
         output += " | {} | \n".format(self.bottom)
         return output
-        
 
 
 def display_cards_horizontally(cards):
-    '''
+    """
     Given a list of Card objects, returns an string showing the objects horizontally
-    '''
+    """
     line1 = ""
     line2 = ""
     line3 = ""
@@ -71,7 +71,8 @@ def display_cards_horizontally(cards):
             line3 += " |{} {}| ".format(card.left, card.right)
             line4 += " | {} | ".format(card.bottom)
 
-    return "{}\n{}\n{}\n{}\n".format(line1,line2,line3,line4)
+    return "{}\n{}\n{}\n{}\n".format(line1, line2, line3, line4)
+
 
 class Player:
     def __init__(self, name):
@@ -82,14 +83,25 @@ class Player:
     def __str__(self):
         output = "Player {} Hand:".format(self.name)
 
+
 class GameState:
     def __init__(self):
-        # Cell Positions are treated like a NUMPAD 
+        # Cell Positions are treated like a NUMPAD
         #
         #   7  8  9
         #   4  5  6
         #   1  2  3
-        self.board = {1: None, 2: None, 3: None, 4: None, 5: None, 6: None, 7: None, 8: None, 9: None}
+        self.board = {
+            1: None,
+            2: None,
+            3: None,
+            4: None,
+            5: None,
+            6: None,
+            7: None,
+            8: None,
+            9: None,
+        }
 
         self.players = {PLAYER: Player(name=PLAYER), OPPONENT: Player(name=OPPONENT)}
 
@@ -98,23 +110,23 @@ class GameState:
         self.points = {PLAYER: 0, OPPONENT: 0}
 
         self.previous_gamestate = None
-    
+
     def get_winner(self):
         if self.points[PLAYER] > self.points[OPPONENT]:
             return PLAYER
         else:
             return OPPONENT
-    
+
     def game_over(self):
-        '''
+        """
         Returns whether the game is over.
-        '''
+        """
         return len(self.get_available_positions()) == 0
 
     def get_opposite_player(self):
         if self.current_player == PLAYER:
             return OPPONENT
-        else: 
+        else:
             return PLAYER
 
     def make_move(self, card_symbol, position):
@@ -134,7 +146,7 @@ class GameState:
         neighbour_cards = self.get_neighbours(position)
 
         # Update card ownership if power values exceed adjacent card power values
-        
+
         # Neighbour card is above current card
         neighbour_card = neighbour_cards["above"]
         if neighbour_card != None:
@@ -143,7 +155,7 @@ class GameState:
                     neighbour_card.owner = self.current_player
                     self.points[self.current_player] += 1
                     self.points[other_player] -= 1
-        
+
         # Neighbour card is left of current card
         neighbour_card = neighbour_cards["left_of"]
         if neighbour_card != None:
@@ -163,7 +175,7 @@ class GameState:
                     self.points[other_player] -= 1
 
         # Neighbour card is below current card
-        neighbour_card = neighbour_cards["below"] 
+        neighbour_card = neighbour_cards["below"]
         if neighbour_card != None:
             if neighbour_card.owner == other_player:
                 if card.bottom > neighbour_card.top:
@@ -171,7 +183,7 @@ class GameState:
                     self.points[self.current_player] += 1
                     self.points[other_player] -= 1
 
-        # Switch the current player 
+        # Switch the current player
         self.current_player = other_player
 
     def next_possible_moves(self):
@@ -186,24 +198,24 @@ class GameState:
         return next_moves
 
     def get_available_positions(self):
-        '''
+        """
         Return a list of integers of available positions that can be played.
-        '''
+        """
         available_positions = []
         for position in self.board:
             if self.board[position] == None:
                 available_positions.append(position)
-        return available_positions 
+        return available_positions
 
     def get_neighbours(self, position):
-        '''
+        """
         For a given position (int), provide list of neighbouring cards on the board.
         Positions are laid out like a NUM-PAD
 
         7 8 9
         4 5 6
         1 2 3
-        '''
+        """
         neighbours = {"left_of": None, "above": None, "right_of": None, "below": None}
 
         if position == 7:
@@ -243,34 +255,73 @@ class GameState:
         return neighbours
 
     def __str__(self):
-        board_output = "-------------------------------------------\nCurrent Player: {}  |  Points: P = {}, O = {}\n" \
-                            .format(self.current_player, self.points[PLAYER], self.points[OPPONENT])
-        board_output += display_cards_horizontally([self.board[7], self.board[8], self.board[9]]) + "\n"
-        board_output += display_cards_horizontally([self.board[4], self.board[5], self.board[6]]) + "\n"
-        board_output += display_cards_horizontally([self.board[1], self.board[2], self.board[3]]) + "\n"
-        player_cards_output = display_cards_horizontally(self.players[PLAYER].hand.values())
-        opp_cards_output = display_cards_horizontally(self.players[OPPONENT].hand.values())
-        return "Player (P) Cards:\n{}\n\nOpponent (O) Cards:\n{}\n\nBoard:\n{}".format(player_cards_output, opp_cards_output, board_output)
+        board_output = "-------------------------------------------\nCurrent Player: {}  |  Points: P = {}, O = {}\n".format(
+            self.current_player, self.points[PLAYER], self.points[OPPONENT]
+        )
+        board_output += (
+            display_cards_horizontally([self.board[7], self.board[8], self.board[9]])
+            + "\n"
+        )
+        board_output += (
+            display_cards_horizontally([self.board[4], self.board[5], self.board[6]])
+            + "\n"
+        )
+        board_output += (
+            display_cards_horizontally([self.board[1], self.board[2], self.board[3]])
+            + "\n"
+        )
+        player_cards_output = display_cards_horizontally(
+            self.players[PLAYER].hand.values()
+        )
+        opp_cards_output = display_cards_horizontally(
+            self.players[OPPONENT].hand.values()
+        )
+        return "Player (P) Cards:\n{}\n\nOpponent (O) Cards:\n{}\n\nBoard:\n{}".format(
+            player_cards_output, opp_cards_output, board_output
+        )
+
+
+def evaluate_game_state(gamestate, player):
+    other_player = gamestate.get_opposite_player()
+    score = gamestate.points[player] - gamestate.points[other_player]
+
+    # Consider corner positions
+    corners = [1, 3, 7, 9]
+    for corner in corners:
+        if gamestate.board[corner] and gamestate.board[corner].owner == player:
+            score += 3  # Prioritize corners
+
+    # Consider edge positions
+    edges = [2, 4, 6, 8]
+    for edge in edges:
+        if gamestate.board[edge] and gamestate.board[edge].owner == player:
+            score += 2  # Prioritize edges
+
+    return score
+
 
 # Reference: https://levelup.gitconnected.com/mastering-tic-tac-toe-with-minimax-algorithm-3394d65fa88f
 def minimax(gamestate, isMaxTurn, depth, max_depth, player):
-    '''
+    """
     Uses a Minimax tree to recommend the best next move for the player
-    '''
+    """
     other_player = gamestate.get_opposite_player()
     if gamestate.game_over() or depth == max_depth:
         return gamestate.points[player] - gamestate.points[other_player]
-    
+
     scores = []
     for move in gamestate.next_possible_moves():
         new_gamestate = copy.deepcopy(gamestate)
         card_symbol, position = move
         new_gamestate.make_move(card_symbol, position)
-        scores.append(minimax(new_gamestate, not isMaxTurn, depth + 1, max_depth, player))
-    
+        scores.append(
+            minimax(new_gamestate, not isMaxTurn, depth + 1, max_depth, player)
+        )
+
     return max(scores) if isMaxTurn else min(scores)
 
-def best_move(gamestate, max_depth = 3):
+
+def best_move(gamestate, max_depth=3):
     bestScore = -math.inf
     bestMove = None
 
@@ -283,13 +334,14 @@ def best_move(gamestate, max_depth = 3):
         if score > bestScore:
             bestScore = score
             bestMove = move
-    
+
     return bestMove, bestScore
 
+
 def gamestate_from_file(filepath):
-    '''
+    """
     Generate a GameState object from a file
-    '''
+    """
 
     with open(filepath) as f:
         dataMap = yaml.safe_load(f)
@@ -299,32 +351,53 @@ def gamestate_from_file(filepath):
 
     for card_id in dataMap["Cards"]:
         card_details = dataMap["Cards"][card_id]
-        card = Card(symbol=card_details["symbol"],
-                    owner=card_details["owner"],
-                    top=card_details["top"],
-                    left=card_details["left"],
-                    right=card_details["right"],
-                    bottom=card_details["bottom"])
-        position = card_details['position']
+        card = Card(
+            symbol=card_details["symbol"],
+            owner=card_details["owner"],
+            top=card_details["top"],
+            left=card_details["left"],
+            right=card_details["right"],
+            bottom=card_details["bottom"],
+        )
+        position = card_details["position"]
         if position == "Hand":
             gamestate.players[card_details["owner"]].hand[card_details["symbol"]] = card
         else:
             gamestate.board[position] = card
     return gamestate
 
+
 def is_valid_file(parser, arg):
     if not os.path.exists(arg):
         parser.error("The file %s does not exist!" % arg)
     return arg
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', dest='filepath', required=True,
-                        help="Filepath of GameState file (gamestate.yaml)", type=lambda x: is_valid_file(parser, x))
-    parser.add_argument('-d', dest='depth', required=True,
-                        help="Max tree depth of Minimax tree", type=int)
-    parser.add_argument('-s', dest='starting_player', required=True, type=str, help="Starting Player ('P' for Player, or 'O' for Opponent)")
+    parser.add_argument(
+        "-f",
+        dest="filepath",
+        required=True,
+        help="Filepath of GameState file (gamestate.yaml)",
+        type=lambda x: is_valid_file(parser, x),
+    )
+    parser.add_argument(
+        "-d",
+        dest="depth",
+        required=True,
+        help="Max tree depth of Minimax tree",
+        type=int,
+    )
+    parser.add_argument(
+        "-s",
+        dest="starting_player",
+        required=True,
+        type=str,
+        help="Starting Player ('P' for Player, or 'O' for Opponent)",
+    )
     return parser.parse_args()
+
 
 def main():
     args = parse_args()
@@ -332,7 +405,7 @@ def main():
     gamestate.starting_player = args.starting_player
     turn_count = 0
 
-    while(not gamestate.game_over()):
+    while not gamestate.game_over():
         print(gamestate)
 
         if gamestate.current_player == PLAYER:
@@ -342,18 +415,28 @@ def main():
 
         print("Player {}: Make a move:".format(gamestate.current_player))
 
-        while (True):
-            available_card_symbols = list(gamestate.players[gamestate.current_player].hand.keys())
-            card_symbol = input("Choose a card to place (Available = {}.".format(available_card_symbols))
+        while True:
+            available_card_symbols = list(
+                gamestate.players[gamestate.current_player].hand.keys()
+            )
+            card_symbol = input(
+                "Choose a card to place (Available = {}.".format(available_card_symbols)
+            )
             if card_symbol in available_card_symbols:
                 break
             else:
                 print("Invalid input... try again.")
 
-        while(True):
+        while True:
             available_positions = gamestate.get_available_positions()
             try:
-                position = int(input("Choose a position: (Available = {})".format(available_positions)))
+                position = int(
+                    input(
+                        "Choose a position: (Available = {})".format(
+                            available_positions
+                        )
+                    )
+                )
                 if position in available_positions:
                     break
                 else:
@@ -365,7 +448,10 @@ def main():
         gamestate.make_move(card_symbol, position)
 
     print(gamestate)
-    print("Winner is {}. Final score: {}".format(gamestate.get_winner(), gamestate.points))
+    print(
+        "Winner is {}. Final score: {}".format(gamestate.get_winner(), gamestate.points)
+    )
+
 
 if __name__ == "__main__":
     main()
