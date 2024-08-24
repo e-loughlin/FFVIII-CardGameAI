@@ -338,19 +338,78 @@ def best_move(gamestate, max_depth=3):
     return bestMove, bestScore
 
 
+class InvalidYAMLException(Exception):
+    pass
+
+
 def gamestate_from_file(filepath):
     """
-    Generate a GameState object from a file
+    Generate a GameState object from a file, with validation.
+    Raises InvalidYAMLException if any validation checks fail.
     """
 
     with open(filepath) as f:
-        dataMap = yaml.safe_load(f)
+        try:
+            dataMap = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise InvalidYAMLException(f"Error loading YAML file: {e}")
+
+    # Validate required keys
+    required_keys = {"Current_Player", "Cards"}
+    if not required_keys.issubset(dataMap.keys()):
+        raise InvalidYAMLException(
+            f"Missing required keys: {required_keys - set(dataMap.keys())}"
+        )
+
+    # Validate Current_Player
+    if dataMap["Current_Player"] not in {"O", "P"}:
+        raise InvalidYAMLException(
+            f"Invalid Current_Player: {dataMap['Current_Player']}"
+        )
 
     gamestate = GameState()
     gamestate.current_player = dataMap["Current_Player"]
 
-    for card_id in dataMap["Cards"]:
-        card_details = dataMap["Cards"][card_id]
+    for card_id, card_details in dataMap["Cards"].items():
+        # Validate card details
+        required_card_keys = {
+            "symbol",
+            "owner",
+            "top",
+            "left",
+            "bottom",
+            "right",
+            "position",
+        }
+        if not required_card_keys.issubset(card_details.keys()):
+            raise InvalidYAMLException(
+                f"Missing required keys for card {card_id}: {required_card_keys - set(card_details.keys())}"
+            )
+
+        if card_details["owner"] not in {"O", "P"}:
+            raise InvalidYAMLException(
+                f"Invalid owner for card {card_id}: {card_details['owner']}"
+            )
+
+        if not (
+            1 <= card_details["top"] <= 10
+            and 1 <= card_details["left"] <= 10
+            and 1 <= card_details["bottom"] <= 10
+            and 1 <= card_details["right"] <= 10
+        ):
+            raise InvalidYAMLException(
+                f"Invalid card values for card {card_id}: {card_details['top']}, {card_details['left']}, {card_details['bottom']}, {card_details['right']}"
+            )
+
+        position = card_details["position"]
+        if position != "Hand" and not (
+            isinstance(position, int) and 1 <= position <= 9
+        ):
+            raise InvalidYAMLException(
+                f"Invalid position for card {card_id}: {position}"
+            )
+
+        # Create the card object
         card = Card(
             symbol=card_details["symbol"],
             owner=card_details["owner"],
@@ -359,11 +418,13 @@ def gamestate_from_file(filepath):
             right=card_details["right"],
             bottom=card_details["bottom"],
         )
-        position = card_details["position"]
+
+        # Add the card to the appropriate location
         if position == "Hand":
             gamestate.players[card_details["owner"]].hand[card_details["symbol"]] = card
         else:
             gamestate.board[position] = card
+
     return gamestate
 
 
