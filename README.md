@@ -23,12 +23,6 @@ Take a look here for my explanation on the Minimax Algorithm: https://e-loughlin
    cd ffviii-card-game-ai
    ```
 
-2. Install the required Python packages:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
 ## Usage
 
 To run the program and get a move recommendation:
