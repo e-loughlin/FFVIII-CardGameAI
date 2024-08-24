@@ -4,6 +4,10 @@
 
 This Python program provides recommendations for the "Best Move" in the Final Fantasy VIII Card Game, given a particular game state. It uses a simple Minimax algorithm to evaluate possible moves and determine the optimal one.
 
+## How It Works
+
+Take a look here for my explanation on the Minimax Algorithm: https://e-loughlin.github.io/final-fantasy-viii-triple-triad-solver/
+
 ## Features
 
 - **Game State Representation**: The game state is represented in a YAML file (`gamestate.yaml`) that specifies the 10 cards in the game, their owners, positions, and strength values.
