@@ -19,7 +19,7 @@ Take a look here for my explanation on the Minimax Algorithm: https://e-loughlin
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/ffviii-card-game-ai.git
+   git clone https://github.com/e-loughlin/ffviii-card-game-ai.git
    cd ffviii-card-game-ai
    ```
 
