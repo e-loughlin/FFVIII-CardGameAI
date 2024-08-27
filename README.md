@@ -34,22 +34,22 @@ Take a look here for my explanation on the Minimax Algorithm: https://e-loughlin
 To run the program and get a move recommendation:
 
 ```bash
-python main.py -f <path_to_gamestate.yaml> -d <max_tree_depth> -s <starting_player>
+python main.py --gamestate <path_to_gamestate.yaml> --depth <max_tree_depth> [--debug]
 ```
 
 ### Arguments:
 
-- `-f <filepath>`: The file path to the `gamestate.yaml` file that defines the current game state.
-- `-d <depth>`: The maximum depth for the Minimax algorithm. This determines how many moves ahead the AI will consider.
-- `-s <starting_player>`: The player who is starting the game. Use `'P'` for Player or `'O'` for Opponent.
+- `--gamestate <filepath>`: The file path to the `gamestate.yaml` file that defines the current game state.
+- `--depth <depth>`: The maximum depth for the Minimax algorithm. This determines how many moves ahead the AI will consider. Default is 3.
+- `--debug`: Enable debug mode.
 
 ### Example:
 
 ```bash
-python main.py -f gamestate.yaml -d 3 -s P
+python main.py --gamestate gamestate.yaml --depth 3 --debug
 ```
 
-This command will load the game state from `gamestate.yaml`, evaluate the best possible move up to a depth of 3, and assume that the Player is starting.
+This command will load the game state from `gamestate.yaml`, evaluate the best possible move up to a depth of 3, and enable debug mode.
 
 ## Game State File (gamestate.yaml)
 
@@ -59,7 +59,7 @@ The `gamestate.yaml` file should define the 10 cards in the game, their position
 Current_Player: P
 Cards:
   1:
-    symbol: Cactuar
+    symbol: A
     owner: P
     top: 1
     left: 4
@@ -67,7 +67,7 @@ Cards:
     bottom: 2
     position: Hand
   2:
-    symbol: Tonberry
+    symbol: B 
     owner: O
     top: 2
     left: 2

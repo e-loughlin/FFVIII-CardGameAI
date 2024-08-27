@@ -1,82 +1,82 @@
 Cards:
   card1:
     symbol: "A"
-    top: 4
+    top: 1
     left: 2
-    bottom: 5
-    right: 4
+    bottom: 3
+    right: 7
     position: "Hand"
     owner: "P"
   card2:
     symbol: "B"
-    top: 6
-    left: 6
-    bottom: 1
-    right: 3
+    top: 1
+    left: 9
+    bottom: 9
+    right: 5
     position: "Hand"
     owner: "P"
   card3:
     symbol: "C"
-    top: 6
-    left: 3
-    bottom: 2
-    right: 6
+    top: 8
+    left: 8
+    bottom: 3
+    right: 2
     position: "Hand"
     owner: "P"
   card4:
     symbol: "D"
-    top: 3
-    left: 1
+    top: 8
+    left: 3
     bottom: 2
-    right: 5
+    right: 8
     position: "Hand"
     owner: "P"
   card5:
     symbol: "E"
-    top: 8
-    left: 4
-    bottom: 4
-    right: 8
+    top: 5
+    left: 8
+    bottom: 7
+    right: 1
     position: "Hand"
     owner: "P"
   card6:
     symbol: "V"
-    top: 1
-    left: 3
-    bottom: 8
-    right: 8
+    top: 4
+    left: 4
+    bottom: 6
+    right: 6
     position: "Hand"
     owner: "O"
   card7:
     symbol: "W"
-    top: 6
-    left: 6
-    bottom: 1
+    top: 7
+    left: 1
+    bottom: 7
     right: 3
     position: "Hand"
     owner: "O"
   card8:
     symbol: "X"
-    top: 7
+    top: 6
     left: 3
-    bottom: 1
-    right: 5
+    bottom: 6
+    right: 6
     position: "Hand"
     owner: "O"
   card9:
     symbol: "Y"
-    top: 3
-    left: 4
-    bottom: 4
-    right: 6
+    top: 8
+    left: 7
+    bottom: 1
+    right: 4
     position: "Hand"
     owner: "O"
   card10:
     symbol: "Z"
-    top: 3
-    left: 3
-    bottom: 4
-    right: 2
+    top: 2
+    left: 7
+    bottom: 8
+    right: 3
     position: "Hand"
     owner: "O"
-Current_Player: "P"
+Current_Player: "O"
