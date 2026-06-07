@@ -44,6 +44,16 @@ class Card:
         # Owner: Whether card is flipped for Player (P) or Opponent (O)
         self.owner = owner
 
+    def copy(self, owner=None):
+        return Card(
+            self.symbol,
+            owner if owner is not None else self.owner,
+            self.top,
+            self.left,
+            self.right,
+            self.bottom,
+        )
+
     def get_total_power(self):
         return self.top + self.left + self.bottom + self.right
 
@@ -115,6 +125,15 @@ class GameState:
 
         self.previous_gamestate = None
 
+    def clone(self):
+        new_gs = GameState()
+        new_gs.board = self.board.copy()
+        new_gs.points = self.points.copy()
+        new_gs.current_player = self.current_player
+        for p in [PLAYER, OPPONENT]:
+            new_gs.players[p].hand = self.players[p].hand.copy()
+        return new_gs
+
     def get_winner(self):
         if self.points[PLAYER] > self.points[OPPONENT]:
             return PLAYER
@@ -136,8 +155,6 @@ class GameState:
     def make_move(self, card_symbol, position):
 
         card = self.players[self.current_player].hand[card_symbol]
-        # print("MAKE MOVE")
-        # print(card)
 
         # Remove from hand
         del self.players[self.current_player].hand[card_symbol]
@@ -147,43 +164,24 @@ class GameState:
 
         other_player = self.get_opposite_player()
 
-        neighbour_cards = self.get_neighbours(position)
+        neighbour_cards = self.get_neighbours_with_pos(position)
 
-        # Update card ownership if power values exceed adjacent card power values
+        for direction, (neighbour_card, neighbour_pos) in neighbour_cards.items():
+            if neighbour_card != None and neighbour_card.owner == other_player:
+                flipped = False
+                if direction == "above" and card.top > neighbour_card.bottom:
+                    flipped = True
+                elif direction == "left_of" and card.left > neighbour_card.right:
+                    flipped = True
+                elif direction == "right_of" and card.right > neighbour_card.left:
+                    flipped = True
+                elif direction == "below" and card.bottom > neighbour_card.top:
+                    flipped = True
 
-        # Neighbour card is above current card
-        neighbour_card = neighbour_cards["above"]
-        if neighbour_card != None:
-            if neighbour_card.owner == other_player:
-                if card.top > neighbour_card.bottom:
-                    neighbour_card.owner = self.current_player
-                    self.points[self.current_player] += 1
-                    self.points[other_player] -= 1
-
-        # Neighbour card is left of current card
-        neighbour_card = neighbour_cards["left_of"]
-        if neighbour_card != None:
-            if neighbour_card.owner == other_player:
-                if card.left > neighbour_card.right:
-                    neighbour_card.owner = self.current_player
-                    self.points[self.current_player] += 1
-                    self.points[other_player] -= 1
-
-        # Neighbour card is right of current card
-        neighbour_card = neighbour_cards["right_of"]
-        if neighbour_card != None:
-            if neighbour_card.owner == other_player:
-                if card.right > neighbour_card.left:
-                    neighbour_card.owner = self.current_player
-                    self.points[self.current_player] += 1
-                    self.points[other_player] -= 1
-
-        # Neighbour card is below current card
-        neighbour_card = neighbour_cards["below"]
-        if neighbour_card != None:
-            if neighbour_card.owner == other_player:
-                if card.bottom > neighbour_card.top:
-                    neighbour_card.owner = self.current_player
+                if flipped:
+                    self.board[neighbour_pos] = neighbour_card.copy(
+                        owner=self.current_player
+                    )
                     self.points[self.current_player] += 1
                     self.points[other_player] -= 1
 
@@ -211,6 +209,58 @@ class GameState:
                 available_positions.append(position)
         return available_positions
 
+    def get_neighbours_with_pos(self, position):
+        """
+        For a given position (int), provide list of neighbouring cards on the board.
+        Positions are laid out like a NUM-PAD
+
+        7 8 9
+        4 5 6
+        1 2 3
+        """
+        neighbours = {
+            "left_of": (None, None),
+            "above": (None, None),
+            "right_of": (None, None),
+            "below": (None, None),
+        }
+
+        if position == 7:
+            neighbours["below"] = (self.board[4], 4)
+            neighbours["right_of"] = (self.board[8], 8)
+        elif position == 8:
+            neighbours["left_of"] = (self.board[7], 7)
+            neighbours["below"] = (self.board[5], 5)
+            neighbours["right_of"] = (self.board[9], 9)
+        elif position == 9:
+            neighbours["left_of"] = (self.board[8], 8)
+            neighbours["below"] = (self.board[6], 6)
+        elif position == 4:
+            neighbours["right_of"] = (self.board[5], 5)
+            neighbours["above"] = (self.board[7], 7)
+            neighbours["below"] = (self.board[1], 1)
+        elif position == 5:
+            neighbours["right_of"] = (self.board[6], 6)
+            neighbours["left_of"] = (self.board[4], 4)
+            neighbours["above"] = (self.board[8], 8)
+            neighbours["below"] = (self.board[2], 2)
+        elif position == 6:
+            neighbours["left_of"] = (self.board[5], 5)
+            neighbours["above"] = (self.board[9], 9)
+            neighbours["below"] = (self.board[3], 3)
+        elif position == 1:
+            neighbours["right_of"] = (self.board[2], 2)
+            neighbours["above"] = (self.board[4], 4)
+        elif position == 2:
+            neighbours["right_of"] = (self.board[3], 3)
+            neighbours["left_of"] = (self.board[1], 1)
+            neighbours["above"] = (self.board[5], 5)
+        elif position == 3:
+            neighbours["above"] = (self.board[6], 6)
+            neighbours["left_of"] = (self.board[2], 2)
+
+        return neighbours
+
     def get_neighbours(self, position):
         """
         For a given position (int), provide list of neighbouring cards on the board.
@@ -220,43 +270,8 @@ class GameState:
         4 5 6
         1 2 3
         """
-        neighbours = {"left_of": None, "above": None, "right_of": None, "below": None}
-
-        if position == 7:
-            neighbours["below"] = self.board[4]
-            neighbours["right_of"] = self.board[8]
-        elif position == 8:
-            neighbours["left_of"] = self.board[7]
-            neighbours["below"] = self.board[5]
-            neighbours["right_of"] = self.board[9]
-        elif position == 9:
-            neighbours["left_of"] = self.board[8]
-            neighbours["below"] = self.board[6]
-        elif position == 4:
-            neighbours["right_of"] = self.board[5]
-            neighbours["above"] = self.board[7]
-            neighbours["below"] = self.board[1]
-        elif position == 5:
-            neighbours["right_of"] = self.board[6]
-            neighbours["left_of"] = self.board[4]
-            neighbours["above"] = self.board[8]
-            neighbours["below"] = self.board[2]
-        elif position == 6:
-            neighbours["left_of"] = self.board[5]
-            neighbours["above"] = self.board[9]
-            neighbours["below"] = self.board[3]
-        elif position == 1:
-            neighbours["right_of"] = self.board[2]
-            neighbours["above"] = self.board[4]
-        elif position == 2:
-            neighbours["right_of"] = self.board[3]
-            neighbours["left_of"] = self.board[1]
-            neighbours["above"] = self.board[5]
-        elif position == 3:
-            neighbours["above"] = self.board[6]
-            neighbours["left_of"] = self.board[2]
-
-        return neighbours
+        neighbours_with_pos = self.get_neighbours_with_pos(position)
+        return {k: v[0] for k, v in neighbours_with_pos.items()}
 
     def __str__(self):
         board_output = "-------------------------------------------\nCurrent Player: {}  |  Points: P = {}, O = {}\n".format(
@@ -286,64 +301,48 @@ class GameState:
 
 
 def evaluate_game_state(gamestate, player):
-    other_player = gamestate.get_opposite_player()
+    other_player = OPPONENT if player == PLAYER else PLAYER
     score = gamestate.points[player] - gamestate.points[other_player]
-
-    ## Positional Advantage
-    ########################
-
-    # position_score = 0
-    # position_factor = 0.1
-    #
-    # # Consider corner positions
-    # corners = [1, 3, 7, 9]
-    # for corner in corners:
-    #     if gamestate.board[corner] and gamestate.board[corner].owner == player:
-    #         position_score += 1 / 9  # Prioritize corners
-    #
-    # # Consider edge positions
-    # edges = [2, 4, 6, 8]
-    # for edge in edges:
-    #     if gamestate.board[edge] and gamestate.board[edge].owner == player:
-    #         position_score += 1 / 9 / 2  # Prioritize edges
-    #
-    # score += position_score * position_factor
-
-    ## Remaining Card Score in Hand Advantage
-    #########################################
-
-    # More Power Remaining in Hand = Better Score
-
-    # card_hand_advantage_score = 0
-    # card_hand_advantage_factor = 0.5
-    #
-    # for card in gamestate.players[player].hand.values():
-    #     card_hand_advantage_score += card.get_total_power() / 40 / 9
-    #
-    # score += card_hand_advantage_score * card_hand_advantage_factor
 
     return score
 
 
 # Reference: https://levelup.gitconnected.com/mastering-tic-tac-toe-with-minimax-algorithm-3394d65fa88f
-def minimax(gamestate, isMaxTurn, depth, max_depth, player):
+def minimax(gamestate, isMaxTurn, depth, max_depth, player, alpha, beta):
     """
     Uses a Minimax tree to recommend the best next move for the player
     """
     if gamestate.game_over() or depth == max_depth:
         return evaluate_game_state(gamestate, player)
-        return gamestate.points[player] - gamestate.points[other_player]
 
-    scores = []
-    for move in gamestate.next_possible_moves():
-        new_gamestate = copy.deepcopy(gamestate)
-        card_symbol, position = move
-        new_gamestate.make_move(card_symbol, position)
-        scores.append(
-            minimax(new_gamestate, not isMaxTurn, depth + 1, max_depth, player)
-        )
-
-    return max(scores) if isMaxTurn else min(scores)
+    if isMaxTurn:
+        best_score = -math.inf
+        for move in gamestate.next_possible_moves():
+            new_gamestate = gamestate.clone()
+            card_symbol, position = move
+            new_gamestate.make_move(card_symbol, position)
+            score = minimax(
+                new_gamestate, False, depth + 1, max_depth, player, alpha, beta
+            )
+            best_score = max(best_score, score)
+            alpha = max(alpha, best_score)
+            if beta <= alpha:
+                break
+        return best_score
+    else:
+        best_score = math.inf
+        for move in gamestate.next_possible_moves():
+            new_gamestate = gamestate.clone()
+            card_symbol, position = move
+            new_gamestate.make_move(card_symbol, position)
+            score = minimax(
+                new_gamestate, True, depth + 1, max_depth, player, alpha, beta
+            )
+            best_score = min(best_score, score)
+            beta = min(beta, best_score)
+            if beta <= alpha:
+                break
+        return best_score
 
 
 def best_move(gamestate, max_depth=3, debug=False, debug_file=None):
@@ -352,10 +351,12 @@ def best_move(gamestate, max_depth=3, debug=False, debug_file=None):
 
     for move in gamestate.next_possible_moves():
         card_symbol, position = move
-        new_gamestate = copy.deepcopy(gamestate)
+        new_gamestate = gamestate.clone()
         new_gamestate.make_move(card_symbol, position)
 
-        score = minimax(new_gamestate, True, 1, max_depth, gamestate.current_player)
+        score = minimax(
+            new_gamestate, False, 1, max_depth, gamestate.current_player, -math.inf, math.inf
+        )
         if score > bestScore:
             bestScore = score
             bestMove = move
