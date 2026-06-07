@@ -1,0 +1,13 @@
+[project]
+name = "ffviii-cardgameai"
+version = "0.1.0"
+description = "FFVIII Triple Triad AI with Web UI"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "Flask>=3.0.3",
+    "PyYAML>=6.0.2",
+]
+
+[dependency-groups]
+dev = []

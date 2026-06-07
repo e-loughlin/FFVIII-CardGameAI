@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFVIII Triple Triad AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>FFVIII Triple Triad AI</h1>
+            <div id="status-bar" class="hidden">
+                <span id="turn-indicator"></span>
+                <span id="score-indicator"></span>
+            </div>
+        </header>
+
+        <main>
+            <!-- Setup View -->
+            <section id="setup-view">
+                <h2>Game Setup</h2>
+                <div class="setup-controls">
+                    <div class="main-setup-btns">
+                        <button id="load-default-btn">Load Default (YAML)</button>
+                        <button id="export-setup-btn" class="secondary">Export to File</button>
+                        <button id="import-setup-btn" class="secondary">Import from File</button>
+                        <input type="file" id="import-file-input" class="hidden" accept=".json">
+                    </div>
+                    <div class="starting-player-select">
+                        <label>Starting Player:</label>
+                        <select id="start-player">
+                            <option value="P">Player (Blue)</option>
+                            <option value="O" selected>Opponent (Red)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setup-grid">
+                    <div class="player-setup">
+                        <h3>Player Cards (Blue)</h3>
+                        <div id="player-card-inputs">
+                            <!-- JS will populate 5 card forms -->
+                        </div>
+                    </div>
+                    <div class="opponent-setup">
+                        <h3>Opponent Cards (Red)</h3>
+                        <div id="opponent-card-inputs">
+                            <!-- JS will populate 5 card forms -->
+                        </div>
+                    </div>
+                </div>
+                <div class="setup-actions">
+                    <button id="start-game-btn" class="primary">Start Custom Game</button>
+                </div>
+            </section>
+
+            <!-- Game View -->
+            <section id="game-view" class="hidden">
+                <div class="game-container">
+                    <div id="opponent-hand" class="hand"></div>
+                    
+                    <div id="board" class="board">
+                        <div class="board-cell" data-pos="7"></div>
+                        <div class="board-cell" data-pos="8"></div>
+                        <div class="board-cell" data-pos="9"></div>
+                        <div class="board-cell" data-pos="4"></div>
+                        <div class="board-cell" data-pos="5"></div>
+                        <div class="board-cell" data-pos="6"></div>
+                        <div class="board-cell" data-pos="1"></div>
+                        <div class="board-cell" data-pos="2"></div>
+                        <div class="board-cell" data-pos="3"></div>
+                    </div>
+
+                    <div id="player-hand" class="hand"></div>
+                </div>
+
+                <div class="game-controls">
+                    <div id="ai-controls">
+                        <div class="depth-control">
+                            <label for="search-depth">Search Depth:</label>
+                            <input type="number" id="search-depth" value="4" min="1" max="9">
+                        </div>
+                        <div class="action-buttons">
+                            <button id="ask-ai-btn">Ask AI for Move</button>
+                            <button id="apply-ai-btn" class="hidden primary">Apply AI Move</button>
+                        </div>
+                        <div id="ai-recommendation" class="info-text"></div>
+                        <div id="ai-all-moves" class="hidden">
+                            <h4>Move Evaluations:</h4>
+                            <ul id="moves-list"></ul>
+                        </div>
+                        <div class="management-buttons">
+                            <button id="undo-btn" class="secondary">Undo</button>
+                            <button id="redo-btn" class="secondary">Redo</button>
+                            <button id="reset-game-btn" class="secondary">Reset Board</button>
+                            <button id="back-home-btn" class="secondary">Back to Setup</button>
+                        </div>
+                    </div>
+                    <div id="game-over-controls" class="hidden">
+                        <h2 id="winner-text"></h2>
+                        <button id="new-game-btn">New Game</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
